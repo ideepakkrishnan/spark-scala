@@ -23,6 +23,8 @@ object App {
     // Define accumulators
     val pageCount = sc.accumulator(0, "total")
     val danglingNodesCount = sc.accumulator(0, "dangling")
+    val delta = sc.accumulator(0.toDouble, "delta")
+    val alpha = sc.broadcast(0.85)
     
     val adjListRDD = sc.textFile("/home/ideepakkrishnan/Documents/pageRank/input")
                     .map(line => {
@@ -58,16 +60,66 @@ object App {
       }
     }).persist()
     
-    adjList.map(t => {
+    var ranksRDD = adjList.map(t => {
       pageCount += 1
       if (t._2 == null || t._2.length() == 0) {
         danglingNodesCount += 1
-      }      
-    }).count()
+      }
+      (t._1, Double.NegativeInfinity)
+    }).reduceByKey(_ + _)
     
-    adjList.saveAsTextFile("/home/ideepakkrishnan/Documents/pageRank/spark_op")
-    println("Total page count: " + pageCount)
-    println("Dangling Node count: " + danglingNodesCount)
+    val count = ranksRDD.count()
+    println("Ranks RDD count: " + count)
+    
+    val defaultRank = sc.broadcast(1 / pageCount.value.toDouble)
+    val totalPages = sc.broadcast(pageCount.value)
+    val totalDanglingNodes = sc.broadcast(danglingNodesCount.value)
+    val alphaByPageCount = sc.broadcast(0.85 / pageCount.value)
+        
+    val i = 0
+    for (i <- 0 until 2) {
+      val pageRankRDD = adjList.join(ranksRDD)
+      
+      val fractionalRanksRDD = pageRankRDD.flatMap(page => {
+        var outlinks = Array.empty[String]
+        var adjNodes = page._2._1
+        var fractionalRank = Double.NegativeInfinity
+        
+        if (adjNodes != null && adjNodes.length() > 0) {
+          outlinks = page._2._1.split(";")
+          
+          var prevRank = defaultRank.value
+          if (page._2._2 != Double.NegativeInfinity) {
+            prevRank = page._2._2
+          }
+          
+          fractionalRank = prevRank
+          if (outlinks.length > 0) {
+            fractionalRank = prevRank / outlinks.length
+          } else {
+            delta += prevRank;
+          }
+        }
+        
+        outlinks.map(outlink => (outlink, fractionalRank))
+      }).reduceByKey(_ + _)
+      
+      val _delta = sc.broadcast(delta.value)
+      
+      ranksRDD = fractionalRanksRDD
+                   .map(page => {                            
+                     val x = _delta.value / totalPages.value
+                     val y = 1 - alpha.value
+                     val z = x + page._2
+                     (page._1, alphaByPageCount.value + y * z)
+                   })
+                   .reduceByKey(_ + _)
+      
+      // Re-initialize delta to 0
+      delta.setValue(0)
+    }
+    
+    ranksRDD.saveAsTextFile("/home/ideepakkrishnan/Documents/pageRank/spark_op")    
     println( "Completed Page Rank calculation" )
   }
 
