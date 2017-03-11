@@ -4,6 +4,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import com.neu.pdp.resources.Util
 import java.util.regex.Pattern
+import java.io._
 
 /**
  * @author ${user.name}
@@ -11,6 +12,11 @@ import java.util.regex.Pattern
 object App {
   
   val namePattern = Pattern.compile("^([^~]+)$");
+  
+  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+    val p = new java.io.PrintWriter(f)
+    try { op(p) } finally { p.close() }
+  }
   
   def main(args : Array[String]) {
     println( "Starting Page Rank calculator" )
@@ -119,7 +125,13 @@ object App {
       delta.setValue(0)
     }
     
-    ranksRDD.saveAsTextFile("/home/ideepakkrishnan/Documents/pageRank/spark_op")    
+    // Top 100 job
+    val top100 = ranksRDD.top(100)(Ordering[Double].on(page => page._2))
+    
+    printToFile(new File("/home/ideepakkrishnan/Documents/pageRank/spark_op.csv")) { p =>
+      top100.foreach(t => p.println(t._1 + "," + t._2))
+    }
+    
     println( "Completed Page Rank calculation" )
   }
 
