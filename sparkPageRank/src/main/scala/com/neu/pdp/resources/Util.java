@@ -25,12 +25,29 @@ import org.xml.sax.XMLReader;
  */
 public class Util {
 	
-	public static String[] fetchOutlinks(String strHtml) {
+	/**
+	 * Extracts all out-links from the HTML source passed
+	 * as argument to this method. This method considers
+	 * only the content inside the div container tag named
+	 * 'bodyContent'.
+	 * @param strHtml : The HTML source of this page
+	 * @return An array containing out-links from this page
+	 */
+	public static String[] fetchOutlinks(String line) {
 		Pattern linkPattern;
 		SAXParserFactory spf;
 		SAXParser saxParser;
 		XMLReader xmlReader;
 		HashSet<String> linkPageNames = new HashSet<String>();
+		String strPageName, strHtml;
+		int iDelimLoc;
+		
+		// Each line is formatted as (Wiki-page-name:Wiki-page-html)
+		iDelimLoc = line.indexOf(':');
+		
+		// Split and get the page name and corresponding html
+		strPageName = line.substring(0, iDelimLoc);
+		strHtml = line.substring(iDelimLoc + 1);
 		
 		// To keep only html filenames having relative paths and not
 		// containing tilde (~)
@@ -85,6 +102,9 @@ public class Util {
 		} catch (Exception e) {
 			// Discard ill-formatted pages.
 		}
+		
+		// Remove self links
+		linkPageNames.remove(strPageName);
 		
 		return linkPageNames.toArray(new String[linkPageNames.size()]);
 	}
