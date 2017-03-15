@@ -8,6 +8,7 @@ import com.neu.pdp.resources.Util
 
 import java.util.regex.Pattern
 import java.io._
+import org.apache.spark.storage.StorageLevel
 
 /**
  * Course: CS6240 - Parallel Data Processing
@@ -55,40 +56,46 @@ object App {
                       (pageName, pageContent)
                     })
                     .filter(t => namePattern.matcher(t._1).find())
-                    .map(t => {
+                    .flatMap(t => {
                         val outlinks = Util.fetchOutlinks(t._2)
                         
-                        // Emit adjacent list for this page
+                        // Initialize an array to hold the adjacency list for this
+                        // page all its outlinks
+                        var arrLen = 0
                         if (outlinks != null && outlinks.length > 0) {
-                          val outlinks_string = outlinks.reduce((a, b) => a + ";" + b)
-                          (t._1, outlinks_string)
+                          arrLen = outlinks.length + 1;
                         } else {
-                          (t._1, "")
+                          arrLen = 1
                         }
+                        
+                        var linkList = new Array[Tuple2[String, String]](arrLen)
+                        
+                        if (outlinks != null && outlinks.length > 0) {
+                          // Emit a record for each out-link from each page so that we
+                          // can get hold of the dangling nodes
+                          for (i <- 0 until outlinks.length) {
+                            linkList(i) = (outlinks(i), "")
+                          }
+                          
+                          // Emit adjacent list for this page
+                          val outlinks_string = outlinks.reduce((a, b) => a + ";" + b)
+                          linkList(arrLen - 1) = (t._1, outlinks_string)
+                        } else {
+                          linkList(0) = (t._1, "")
+                        }
+                        
+                        linkList.map(x => x)
+                    }).reduceByKey((a, b) => {
+                      // Since the previous step might have resulted in multiple
+                      // records with same key, reduce by key
+                      if (b != null && b.length() > 0) {
+                        a + ";" + b
+                      } else {
+                        a + b
+                      }
                     })
     
-    // Emit a record for each out-link from each page so that we
-    // can get hold of the dangling nodes
-    val danglingNodesRDD = adjListRDD.flatMap(t => {
-      t._2.split(";").map(pageName => (pageName, ""))
-    })
-    
-    // Combine the RDD which contains all dangling nodes with the
-    // RDD that contains the adjacency list for all pages in the
-    // data set
-    val allPagesRDD = adjListRDD.union(danglingNodesRDD)
-    
-    // Since the previous step might have resulted in multiple
-    // records with same key, reduce by key
-    val adjList = allPagesRDD.reduceByKey((a, b) => {      
-      if (b != null && b.length() > 0) {
-        a + ";" + b
-      } else {
-        a + b
-      }
-    })
-    
-    return adjList
+    return adjListRDD
   }
   
   /**
@@ -158,7 +165,7 @@ object App {
      * calculation
      */
     val adjList = generateAdjList(sc, "/home/ideepakkrishnan/Documents/pageRank/input")
-                    .persist()
+                    .persist(StorageLevel.MEMORY_AND_DISK)
     
     // Find the total number of pages and total number of dangling
     // nodes. Also initialize the default rank for each page to
