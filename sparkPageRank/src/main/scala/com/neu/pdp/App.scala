@@ -164,7 +164,7 @@ object App {
      * an adjacency list which can be used in actual page rank
      * calculation
      */
-    val adjList = generateAdjList(sc, "/home/ideepakkrishnan/Documents/pageRank/input")
+    val adjList = generateAdjList(sc, args(0))
                     .persist(StorageLevel.MEMORY_AND_DISK)
     
     // Find the total number of pages and total number of dangling
@@ -257,7 +257,7 @@ object App {
      */
     val top100 = ranksRDD.top(100)(Ordering[Double].on(page => page._2))
     
-    printToFile(new File("/home/ideepakkrishnan/Documents/pageRank/spark_op.csv")) { p =>
+    printToFile(new File(args(1))) { p =>
       top100.foreach(t => p.println(t._1 + "," + t._2))
     }
     
