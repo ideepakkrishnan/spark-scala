@@ -2,19 +2,19 @@
 
 # Customize these paths for your environment.
 # -----------------------------------------------------------
-spark.root=/usr/lib/spark
+spark.root=/usr/lib/spark-2.1.0-bin-hadoop2.7
 jar.name=sparkPageRank-1.0-SNAPSHOT.jar
 jar.path=target/${jar.name}
 job.name=sparkPageRank
 local.input=/home/ideepakkrishnan/Documents/pageRank/input/
-local.output=/home/ideepakkrishnan/Documents/pageRank/output/
+local.output=/home/ideepakkrishnan/Documents/pageRank/top100-pages.txt
 # AWS EMR Execution
 aws.emr.release=emr-5.2.1
 aws.region=us-east-1
 aws.bucket.name=pdpbucket
 aws.subnet.id=subnet-b6f4c5ff
 aws.input=input
-aws.output=output
+aws.output=output/top100-pages.txt
 aws.log.dir=logs
 aws.num.nodes=5
 aws.instance.type=m4.large
@@ -51,7 +51,7 @@ cloud: jar upload-input-aws upload-app-aws delete-output-aws
 		--release-label ${aws.emr.release} \
 		--instance-groups '[{"InstanceCount":${aws.num.nodes},"InstanceGroupType":"CORE","InstanceType":"${aws.instance.type}"},{"InstanceCount":1,"InstanceGroupType":"MASTER","InstanceType":"${aws.instance.type}"}]' \
 	    --applications Name=Spark \
-	    --steps '[{"Name":"Spark Program", "Args":["--class", "${job.name}", "--master", "yarn", "--deploy-mode", "cluster", "s3://${aws.bucket.name}/${jar.name}", "s3://${aws.bucket.name}/${aws.input}","s3://${aws.bucket.name}/${aws.output}"],"Type":"Spark","Jar":"s3://${aws.bucket.name}/${jar.name}","ActionOnFailure":"TERMINATE_CLUSTER"}]' \
+	    --steps '[{"Name":"Spark Page Rank", "Args":["--class", "${job.name}", "--master", "yarn", "--deploy-mode", "cluster", "s3://${aws.bucket.name}/${jar.name}", "s3://${aws.bucket.name}/${aws.input}","s3://${aws.bucket.name}/${aws.output}"],"Type":"Spark","Jar":"s3://${aws.bucket.name}/${jar.name}","ActionOnFailure":"TERMINATE_CLUSTER"}]' \
 		--log-uri s3://${aws.bucket.name}/${aws.log.dir} \
 		--service-role EMR_DefaultRole \
 		--ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,SubnetId=${aws.subnet.id} \
