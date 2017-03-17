@@ -9,6 +9,7 @@ import com.neu.pdp.resources.Util
 import java.util.regex.Pattern
 import java.io._
 import org.apache.spark.storage.StorageLevel
+import scala.collection.mutable.ListBuffer
 
 /**
  * Course: CS6240 - Parallel Data Processing
@@ -68,27 +69,34 @@ object App {
                           arrLen = 1
                         }
                         
-                        var linkList = new Array[Tuple2[String, String]](arrLen)
+                        var linkList = new ListBuffer[Tuple2[String, String]]
                         
                         if (outlinks != null && outlinks.length > 0) {
                           // Emit a record for each out-link from each page so that we
                           // can get hold of the dangling nodes
                           for (i <- 0 until outlinks.length) {
-                            linkList(i) = (outlinks(i), "")
+                            linkList += new Tuple2(outlinks(i), "")
                           }
                           
                           // Emit adjacent list for this page
-                          val outlinks_string = outlinks.reduce((a, b) => a + ";" + b)
-                          linkList(arrLen - 1) = (t._1, outlinks_string)
+                          val outlinks_string = outlinks.reduce((a, b) => {
+                                                  if (a != null && a != "" && a.length() > 0 && 
+                                                      b != null && b != "" && b.length() > 0) {
+                                                    a + ";" + b
+                                                  } else {
+                                                    a + b
+                                                  }})
+                          linkList += new Tuple2(t._1, outlinks_string)
                         } else {
-                          linkList(0) = (t._1, "")
+                          linkList += new Tuple2(t._1, "")
                         }
                         
                         linkList.map(x => x)
                     }).reduceByKey((a, b) => {
                       // Since the previous step might have resulted in multiple
                       // records with same key, reduce by key
-                      if (b != null && b.length() > 0) {
+                      if (a != null && a != "" && a.length() > 0 && 
+                          b != null && b != "" && b.length() > 0) {
                         a + ";" + b
                       } else {
                         a + b
