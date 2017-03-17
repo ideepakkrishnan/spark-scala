@@ -149,7 +149,6 @@ object App {
     // Initialize job configuration
     val conf = new SparkConf()
                .setAppName("Page Rank")
-               .setMaster("local")
     
     // Initialize job context
     val sc = new SparkContext(conf)

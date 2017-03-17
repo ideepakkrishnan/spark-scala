@@ -128,7 +128,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.neu.test.App</mainClass>
+                  <mainClass>com.neu.pdp.App</mainClass>
                 </transformer>
               </transformers>
             </configuration>

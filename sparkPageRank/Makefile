@@ -3,18 +3,18 @@
 # Customize these paths for your environment.
 # -----------------------------------------------------------
 spark.root=/usr/lib/spark-2.1.0-bin-hadoop2.7
-jar.name=sparkPageRank-1.0-SNAPSHOT.jar
+jar.name=sparkPageRank-0.0.1-SNAPSHOT.jar
 jar.path=target/${jar.name}
-job.name=sparkPageRank
-local.input=/home/ideepakkrishnan/Documents/pageRank/input/
-local.output=/home/ideepakkrishnan/Documents/pageRank/top100-pages.txt
+job.name=com.neu.pdp.App
+local.input=/home/ideepakkrishnan/Documents/pageRank/input
+local.output=/home/ideepakkrishnan/Documents/pageRank/top100-pages.csv
 # AWS EMR Execution
 aws.emr.release=emr-5.2.1
 aws.region=us-east-1
 aws.bucket.name=pdpbucket
 aws.subnet.id=subnet-b6f4c5ff
 aws.input=input
-aws.output=output/top100-pages.txt
+aws.output=output/top100-pages.csv
 aws.log.dir=logs
 aws.num.nodes=5
 aws.instance.type=m4.large

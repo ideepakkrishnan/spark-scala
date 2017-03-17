@@ -61,7 +61,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.neu.test.App</mainClass>
+                  <mainClass>com.neu.pdp.App</mainClass>
                 </transformer>
               </transformers>
             </configuration>
