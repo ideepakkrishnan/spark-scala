@@ -7,14 +7,14 @@ jar.name=sparkPageRank-0.0.1-SNAPSHOT.jar
 jar.path=target/${jar.name}
 job.name=com.neu.pdp.App
 local.input=/home/ideepakkrishnan/Documents/pageRank/input
-local.output=/home/ideepakkrishnan/Documents/pageRank/top100-pages.csv
+local.output=/home/ideepakkrishnan/Documents/pageRank/output
 # AWS EMR Execution
 aws.emr.release=emr-5.2.1
 aws.region=us-east-1
 aws.bucket.name=pdpbucket
 aws.subnet.id=subnet-b6f4c5ff
 aws.input=input
-aws.output=output/top100-pages.csv
+aws.output=output
 aws.log.dir=logs
 aws.num.nodes=5
 aws.instance.type=m4.large

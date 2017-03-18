@@ -29,15 +29,6 @@ object App {
   val namePattern = Pattern.compile("^([^~]+)$");
   
   /**
-   * Helper function to write data into a file
-   * @param f Complete file path where contents are to be written
-   */
-  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
-    val p = new java.io.PrintWriter(f)
-    try { op(p) } finally { p.close() }
-  }
-  
-  /**
    * Helper function for pre-processing step.
    * Reads the data set from specified path and extracts all
    * relevant pages and their out-links to generate a adjacency
@@ -262,11 +253,9 @@ object App {
      * Find the 100 pages with highest page ranks and write the
      * list into an output file 
      */
-    val top100 = ranksRDD.top(100)(Ordering[Double].on(page => page._2))
+    val top100 = sc.parallelize(ranksRDD.top(100)(Ordering[Double].on(page => page._2)))
     
-    printToFile(new File(args(1))) { p =>
-      top100.foreach(t => p.println(t._1 + "," + t._2))
-    }
+    top100.saveAsTextFile(args(1))
     
     println( "Completed Page Rank calculation" )
   }
