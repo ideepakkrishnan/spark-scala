@@ -51,15 +51,6 @@ object App {
                     .flatMap(t => {
                         val outlinks = Util.fetchOutlinks(t._2)
                         
-                        // Initialize an array to hold the adjacency list for this
-                        // page all its outlinks
-                        var arrLen = 0
-                        if (outlinks != null && outlinks.length > 0) {
-                          arrLen = outlinks.length + 1;
-                        } else {
-                          arrLen = 1
-                        }
-                        
                         var linkList = new ListBuffer[Tuple2[String, String]]
                         
                         if (outlinks != null && outlinks.length > 0) {

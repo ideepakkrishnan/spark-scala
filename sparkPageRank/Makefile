@@ -16,13 +16,13 @@ aws.subnet.id=subnet-b6f4c5ff
 aws.input=input
 aws.output=output
 aws.log.dir=logs
-aws.num.nodes=5
+aws.num.nodes=10
 aws.instance.type=m4.large
 # -----------------------------------------------------------
 
 # Compiles code and builds jar (with dependencies).
 jar:
-	mvn clean package
+#	mvn clean package
 
 # Removes local output directory.
 clean-local-output:
@@ -34,7 +34,7 @@ alone: jar clean-local-output
 
 # Upload data to S3 input dir.
 upload-input-aws: 
-	aws s3 sync ${local.input} s3://${aws.bucket.name}/${aws.input}
+#	aws s3 sync ${local.input} s3://${aws.bucket.name}/${aws.input}
 	
 # Delete S3 output dir.
 delete-output-aws:
@@ -42,7 +42,7 @@ delete-output-aws:
 
 # Upload application to S3 bucket.
 upload-app-aws:
-	aws s3 cp ${jar.path} s3://${aws.bucket.name}
+#	aws s3 cp ${jar.path} s3://${aws.bucket.name}
 
 # Main EMR launch.
 cloud: jar upload-input-aws upload-app-aws delete-output-aws
