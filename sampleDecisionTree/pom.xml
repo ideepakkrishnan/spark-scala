@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.neu.pdp.dataSampler</groupId>
-  <artifactId>dataSampler</artifactId>
+  <groupId>com.neu.pdp.sampleDecisionTree</groupId>
+  <artifactId>sampleDecisionTree</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
-  <description>An application to sample data</description>
-  <inceptionYear>2017</inceptionYear>
+  <description>Sample app to test Decision Tree algorithm</description>
+  <inceptionYear>2015</inceptionYear>
   <licenses>
     <license>
       <name>My License</name>
@@ -128,7 +128,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.neu.pdp.dataSampler.App</mainClass>
+                  <mainClass>com.neu.pdp.sampleDecisionTree.App</mainClass>
                 </transformer>
               </transformers>
             </configuration>
